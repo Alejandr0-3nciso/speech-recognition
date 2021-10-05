@@ -9,20 +9,65 @@ import speech_recognition as sr
 from os import path
 from pydub import AudioSegment
 import pydub
+import pyaudio
 import os
+import pandas as pd
+import numpy as np
+
+os.chdir('C:\\Users\\Usuario\\web development\\Git\\speech-recognition')
 
 
-os.chdir('G:/Shared drives/Proyecto Migracion')
 
 # convert mp3 file to wav  
 
 pydub.AudioSegment.ffmpeg = "/absolute/path/to/ffmpeg"                                                   
-sound = AudioSegment.from_mp3("Copia de lizeth donoso.mp3")
+sound = AudioSegment.from_mp3("Debate presidencial Colombia Noticias Caracol.mp3")
+
+table_times=pd.read_excel("speech times per candidate.xlsx")
+
+
+for i in set(table_times.candidato):
+    table_candidate=table_times[table_times.candidato==i].reset_index()
+    for j in np.arange(table_candidate.shape[0]):
+    
+        startMin = table_candidate['min_inicio'].iloc[j]
+        startSec = table_candidate['seg_inicio'].iloc[j]
+
+        endMin = table_candidate['min_fin'].iloc[j]
+        endSec = table_candidate['seg_fin'].iloc[j]
+
+        # Time to miliseconds
+        startTime = startMin*60*1000+startSec*1000
+        endTime = endMin*60*1000+endSec*1000
+
+        extract = sound[startTime:endTime]
+        file_name=i+str(j)+'.wav'
+        # Saving
+        extract.export( file_name, format="wav")
+                     
+
+        # use the audio file as the audio source                                        
+        r = sr.Recognizer()
+        with sr.AudioFile(file_name) as source:
+            audio = r.record(source)  # read the entire audio file                  
+
+            print("Transcription: " + r.recognize_google(audio,language="es-ES"))
+
+
+
+
+
+
 sound.export("transcript.wav", format="wav")
 
 
+
+halfway_point = len(sound) // 800
+len(sound)//halfway_point 
+halfway_point
+len(sound)
 # transcribe audio file                                                         
-AUDIO_FILE = "transcript.wav"
+AUDIO_FILE = "transcript.wav"                     
 
 # use the audio file as the audio source                                        
 r = sr.Recognizer()
@@ -32,31 +77,5 @@ with sr.AudioFile(AUDIO_FILE) as source:
         print("Transcription: " + r.recognize_google(audio))
         
         
-        
-try:
-    [1,2,3][4]
-except IndexError:
-    print("""IndexError raised""")
-except: 
-    print("""Exception raised""")
-else:
-    print("""Somethin else happened""")
-finally:
-    print("""cleanin""")
-    
-    
-    
-def f(): 
-    f() 
-    return 42
-
-class test():
-    id=0
-    def __init__(self,id):
-        self.id=id
-        id=2
-        
-import re
 
 
-[i for i in ifilter(lamda x:x % 5,islice(count(5),10))]
